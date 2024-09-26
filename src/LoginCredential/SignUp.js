@@ -13,6 +13,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import axios from 'axios'
+import { encryptPassword } from '../Util/encryptPassword'
 
 export const SignUp = () => {
   const allowedChars = /^[a-zA-Z0-9 ]*$/
@@ -69,10 +70,10 @@ export const SignUp = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefalult()
+  const handleSubmit = async (e) => {
     if (validate()) {
       try {
+        await signup()
         toast.error('User Created, Welcome to chat GPT!')
         console.log('Form submitted:', formData)
       } catch (error) {
@@ -82,39 +83,68 @@ export const SignUp = () => {
     }
   }
 
-//   Google Sign-In Success Handler
-    const handleGoogleSuccess = async (res) => {
-      const token = res.credential
-      try {
-        const response = await axios.post(
-          'http://localhost:9000/api/user/googlelogin',
-          { token }
-        )
-        toast.success('Google Login Success!')
-        console.log('Google Login Success:', response.data)
-      } catch (error) {
-        toast.error('Google Login Failed')
-        console.error('Google Login Error:', error)
-      }
-    }
+  const signup = async () => {
+    // if (formData.password !== formData.confirmPassword) {
+    //   toast.error("Passwords do not match!");
+    //   return;
+    // }
 
-    // Google Sign-In Error Handler
-    const handleGoogleError = () => {
+    // Ensure the form data is valid
+    console.log('Form data:', formData)
+
+    const dataToSend = {
+      userName: formData.userName,
+      email: formData.email,
+      password: encryptPassword(formData.password), // Encrypt only the password
+    }
+    console.log('Encrypted Password: ', dataToSend.password)
+
+    try {
+      const response = await axios.post(
+        'http://localhost:9000/api/auth/signup',
+        dataToSend
+      )
+      toast.success('Signed up successfully!')
+      console.log('Signup data: ', response.data)
+    } catch (error) {
+      console.error('Signup failed', error)
+      toast.error('Signup failed!')
+    }
+  }
+
+  //   Google Sign-In Success Handler
+  const handleGoogleSuccess = async (res) => {
+    const token = res.credential
+    try {
+      const response = await axios.post(
+        'http://localhost:9000/api/auth/googlelogin',
+        { token }
+      )
+      toast.success('Google Login Success!')
+      console.log('Google Login Success:', response.data)
+    } catch (error) {
       toast.error('Google Login Failed')
+      console.error('Google Login Error:', error)
     }
+  }
 
-//   const responseGoogle = (response) => {
-//     console.log('Login Success:', response)
-//     alert(`Signed up successfully as: ${response.profileObj.name}`)
+  // Google Sign-In Error Handler
+  const handleGoogleError = () => {
+    toast.error('Google Login Failed')
+  }
 
-//     // Here you can save user info or token
-//     localStorage.setItem('token', response.tokenId)
-//   }
+  //   const responseGoogle = (response) => {
+  //     console.log('Login Success:', response)
+  //     alert(`Signed up successfully as: ${response.profileObj.name}`)
 
-//   const onFailure = (error) => {
-//     console.error('Login failed: ', error)
-//     toast.error('Login failed. Please try again.')
-//   }
+  //     // Here you can save user info or token
+  //     localStorage.setItem('token', response.tokenId)
+  //   }
+
+  //   const onFailure = (error) => {
+  //     console.error('Login failed: ', error)
+  //     toast.error('Login failed. Please try again.')
+  //   }
 
   return (
     <div
@@ -128,7 +158,6 @@ export const SignUp = () => {
     >
       <Card
         color="primary"
-        invertedColors
         orientation="vertical"
         size="lg"
         variant="soft"
@@ -240,6 +269,7 @@ export const SignUp = () => {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
+              one
             />
           </GoogleOAuthProvider>
 
