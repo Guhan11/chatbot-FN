@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import CryptoJS from 'crypto-js'
 import {
   Card,
   CardContent,
@@ -13,7 +14,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import axios from 'axios'
-import { encryptPassword } from '../Util/encryptPassword'
+// import { encryptPassword } from '../Util/encryptPassword'
 
 export const SignUp = () => {
   const allowedChars = /^[a-zA-Z0-9 ]*$/
@@ -70,48 +71,67 @@ export const SignUp = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e) => {
-    if (validate()) {
-      try {
-        await signup()
-        toast.error('User Created, Welcome to chat GPT!')
-        console.log('Form submitted:', formData)
-      } catch (error) {
-        toast.error('User Creation Failed')
-        console.error('Submission error:', error)
-      }
-    }
-  }
+  //   const handleSubmit = async (e) => {
+  //     if (validate()) {
+  //       try {
+  //         await signup()
+  //         toast.error('User Created, Welcome to chat GPT!')
+  //         console.log('Form submitted:', formData)
+  //       } catch (error) {
+  //         toast.error('User Creation Failed')
+  //         console.error('Submission error:', error)
+  //       }
+  //     }
+  //   }
 
   const signup = async () => {
-    // if (formData.password !== formData.confirmPassword) {
-    //   toast.error("Passwords do not match!");
-    //   return;
-    // }
+    if (validate()) {
+      // Check if the password is provided and valid
 
-    // Ensure the form data is valid
-    console.log('Form data:', formData)
+      // if (!formData.password) {
+      //   console.error('Password is undefined or empty.')
+      //   toast.error('Password is required.')
+      //   return
+      // }
 
-    const dataToSend = {
-      userName: formData.userName,
-      email: formData.email,
-      password: encryptPassword(formData.password), // Encrypt only the password
+      // if (formData.password.length < 6) {
+      //   console.error('Password must be at least 6 characters.')
+      //   toast.error('Password must be at least 6 characters.')
+      //   return
+      // }
+
+      // Ensure the form data is valid
+      console.log('Form data:', formData)
+
+      // Prepare the data to send
+      const dataToSend = {
+        userName: formData.userName,
+        email: formData.email,
+        password: CryptoJS.AES.encrypt(
+          formData.password,
+          '6LfSsH4oAAAAAK1fGMgUqd1moEOgYs680vyZAIAc'
+        ).toString(), // Encrypt only the password
+      }
+
+      console.log('Encrypted Password:', dataToSend.password)
+
+      try {
+        // Make the API call to signup
+        const response = await axios.post(
+          'http://localhost:9000/api/auth/signup',
+          dataToSend
+        )
+
+        // Notify the user of a successful signup
+        toast.success('Signed up successfully!')
+        console.log('Signup response data:', response.data)
+      } catch (error) {
+        console.error('Signup failed', error)
+        toast.error('Signup failed! Please try again.') // Improved error message
+      }
     }
-    console.log('Encrypted Password: ', dataToSend.password)
-
-    try {
-      const response = await axios.post(
-        'http://localhost:9000/api/auth/signup',
-        dataToSend
-      )
-      toast.success('Signed up successfully!')
-      console.log('Signup data: ', response.data)
-    } catch (error) {
-      console.error('Signup failed', error)
-      toast.error('Signup failed!')
-    }
-  }
-
+}
+  
   //   Google Sign-In Success Handler
   const handleGoogleSuccess = async (res) => {
     const token = res.credential
@@ -122,6 +142,7 @@ export const SignUp = () => {
       )
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
+      localStorage.setItem('Token: ', res.data.token)
     } catch (error) {
       toast.error('Google Login Failed')
       console.error('Google Login Error:', error)
@@ -167,7 +188,8 @@ export const SignUp = () => {
           <Typography variant="h5" component="h2" gutterBottom>
             Create Your Account
           </Typography>
-          <form onSubmit={handleSubmit}>
+          {/* <form onSubmit={handleSubmit}> */}
+          <form>
             <FormControl fullWidth margin="normal">
               <InputLabel htmlFor="userName">UserName</InputLabel>
               <Input
@@ -239,11 +261,11 @@ export const SignUp = () => {
             </FormControl>
 
             <Button
-              type="submit"
               variant="contained"
               color="primary"
               fullWidth
               style={{ marginTop: '16px' }}
+              onClick={signup}
             >
               Sign Up
             </Button>
@@ -269,7 +291,7 @@ export const SignUp = () => {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              one
+              //   one
             />
           </GoogleOAuthProvider>
 
