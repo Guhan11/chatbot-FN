@@ -116,7 +116,7 @@ export const SignUp = () => {
       )
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
-      localStorage.setItem('Token: ', res.data.token)
+      localStorage.setItem('Token: ',token)
     } catch (error) {
       toast.error('Google Login Failed')
       //   console.error('Google Login Error:', error)
@@ -261,7 +261,7 @@ export const SignUp = () => {
           <GoogleOAuthProvider clientId="407970374604-3g6c02mk9rsnjhrchsl1pna3t8g20h8h.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
+            //   onError={handleGoogleError}
             />
           </GoogleOAuthProvider>
 
