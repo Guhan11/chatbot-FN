@@ -79,7 +79,7 @@ export const SignUp = () => {
 
       // Prepare the data to send
       const dataToSend = {
-        userName: formData.userName,
+        userName: formData.userName.toUpperCase(),
         email: formData.email,
         password: CryptoJS.AES.encrypt(
           formData.password,
