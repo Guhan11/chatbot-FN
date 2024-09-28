@@ -114,12 +114,13 @@ export const SignUp = () => {
         'http://localhost:9000/api/auth/googlelogin',
         { token }
       )
+      const jwtToken = response.data
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
-      localStorage.setItem('Token: ', res.data.token)
+      localStorage.setItem('Token: ', jwtToken)
     } catch (error) {
       toast.error('Google Login Failed')
-      console.error('Google Login Error:', error)
+      //   console.error('Google Login Error:', error)
     }
   }
 
@@ -127,7 +128,6 @@ export const SignUp = () => {
   const handleGoogleError = () => {
     toast.error('Google Login Failed')
   }
-
 
   return (
     <div
