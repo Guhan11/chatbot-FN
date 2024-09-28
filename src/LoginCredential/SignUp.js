@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import CryptoJS from 'crypto-js'
+import { Link as RouterLink } from 'react-router-dom'
 import {
   Card,
   CardContent,
@@ -71,35 +72,8 @@ export const SignUp = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  //   const handleSubmit = async (e) => {
-  //     if (validate()) {
-  //       try {
-  //         await signup()
-  //         toast.error('User Created, Welcome to chat GPT!')
-  //         console.log('Form submitted:', formData)
-  //       } catch (error) {
-  //         toast.error('User Creation Failed')
-  //         console.error('Submission error:', error)
-  //       }
-  //     }
-  //   }
-
   const signup = async () => {
     if (validate()) {
-      // Check if the password is provided and valid
-
-      // if (!formData.password) {
-      //   console.error('Password is undefined or empty.')
-      //   toast.error('Password is required.')
-      //   return
-      // }
-
-      // if (formData.password.length < 6) {
-      //   console.error('Password must be at least 6 characters.')
-      //   toast.error('Password must be at least 6 characters.')
-      //   return
-      // }
-
       // Ensure the form data is valid
       console.log('Form data:', formData)
 
@@ -130,8 +104,8 @@ export const SignUp = () => {
         toast.error('Signup failed! Please try again.') // Improved error message
       }
     }
-}
-  
+  }
+
   //   Google Sign-In Success Handler
   const handleGoogleSuccess = async (res) => {
     const token = res.credential
@@ -154,18 +128,6 @@ export const SignUp = () => {
     toast.error('Google Login Failed')
   }
 
-  //   const responseGoogle = (response) => {
-  //     console.log('Login Success:', response)
-  //     alert(`Signed up successfully as: ${response.profileObj.name}`)
-
-  //     // Here you can save user info or token
-  //     localStorage.setItem('token', response.tokenId)
-  //   }
-
-  //   const onFailure = (error) => {
-  //     console.error('Login failed: ', error)
-  //     toast.error('Login failed. Please try again.')
-  //   }
 
   return (
     <div
@@ -276,13 +238,23 @@ export const SignUp = () => {
             align="center"
             style={{ marginTop: '16px' }}
           >
-            Already have an account? <Link href="/login">Login</Link>
+            Already have an account?{' '}
+            <Link
+              component={RouterLink}
+              to="/login" // Correct routing to login page
+              style={{
+                textDecoration: 'none', // Removes underline
+                color: '#4285F4', // Optional: Change the link color if needed
+              }}
+            >
+              Login
+            </Link>
           </Typography>
 
           <Typography
             variant="body2"
             align="center"
-            style={{ marginTop: '16px' }}
+            style={{ marginTop: '16px', marginBottom: '16px' }}
           >
             OR
           </Typography>
@@ -291,7 +263,6 @@ export const SignUp = () => {
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              //   one
             />
           </GoogleOAuthProvider>
 

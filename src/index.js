@@ -2,12 +2,17 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
 import reportWebVitals from './reportWebVitals'
-import SignUp from './LoginCredential/SignUp'
+// import SignUp from './LoginCredential/SignUp'
+import AuthenticationRoutes from './Routes/AuthenticationRoutes'
+import { BrowserRouter } from 'react-router-dom'
+// import { Login } from '@mui/icons-material'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <SignUp />
+    <BrowserRouter>
+      <AuthenticationRoutes />
+    </BrowserRouter>
   </React.StrictMode>
 )
 
