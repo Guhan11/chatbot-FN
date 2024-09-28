@@ -99,6 +99,12 @@ export const SignUp = () => {
         // Notify the user of a successful signup
         toast.success('Signed up successfully!')
         console.log('Signup response data:', response.data)
+        setFormData({
+            userName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+          });
       } catch (error) {
         console.error('Signup failed', error)
         toast.error('Signup failed! Please try again.') // Improved error message
