@@ -100,11 +100,11 @@ export const SignUp = () => {
         toast.success('Signed up successfully!')
         console.log('Signup response data:', response.data)
         setFormData({
-            userName: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-          });
+          userName: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+        })
       } catch (error) {
         console.error('Signup failed', error)
         toast.error('Signup failed! Please try again.') // Improved error message
@@ -122,7 +122,7 @@ export const SignUp = () => {
       )
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
-      localStorage.setItem('Token: ',token)
+      localStorage.setItem('Token: ', token)
     } catch (error) {
       toast.error('Google Login Failed')
       //   console.error('Google Login Error:', error)
@@ -267,7 +267,7 @@ export const SignUp = () => {
           <GoogleOAuthProvider clientId="407970374604-3g6c02mk9rsnjhrchsl1pna3t8g20h8h.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
-            //   onError={handleGoogleError}
+              //   onError={handleGoogleError}
             />
           </GoogleOAuthProvider>
 
