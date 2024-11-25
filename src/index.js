@@ -5,6 +5,7 @@ import reportWebVitals from './reportWebVitals'
 // import SignUp from './LoginCredential/SignUp'
 import AuthenticationRoutes from './Routes/AuthenticationRoutes'
 import { BrowserRouter } from 'react-router-dom'
+import MainRoutes from './Routes/MainRoutes'
 // import { Login } from '@mui/icons-material'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
@@ -12,6 +13,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthenticationRoutes />
+      {/* <MainRoutes/> */}
     </BrowserRouter>
   </React.StrictMode>
 )

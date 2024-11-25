@@ -15,7 +15,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import axios from 'axios'
-// import { encryptPassword } from '../Util/encryptPassword'
+import { encryptPassword } from '../Util/encryptPassword'
 
 export const SignUp = () => {
   const allowedChars = /^[a-zA-Z0-9 ]*$/
@@ -81,10 +81,7 @@ export const SignUp = () => {
       const dataToSend = {
         userName: formData.userName.toUpperCase(),
         email: formData.email,
-        password: CryptoJS.AES.encrypt(
-          formData.password,
-          '6LfSsH4oAAAAAK1fGMgUqd1moEOgYs680vyZAIAc'
-        ).toString(), // Encrypt only the password
+        password:encryptPassword(formData.password)
       }
 
       console.log('Encrypted Password:', dataToSend.password)
@@ -130,9 +127,9 @@ export const SignUp = () => {
   }
 
   // Google Sign-In Error Handler
-  const handleGoogleError = () => {
-    toast.error('Google Login Failed')
-  }
+//   const handleGoogleError = () => {
+//     toast.error('Google Login Failed')
+//   }
 
   return (
     <div
@@ -246,7 +243,7 @@ export const SignUp = () => {
             Already have an account?{' '}
             <Link
               component={RouterLink}
-              to="/login" // Correct routing to login page
+              to="/" // Correct routing to login page
               style={{
                 textDecoration: 'none', // Removes underline
                 color: '#4285F4', // Optional: Change the link color if needed
