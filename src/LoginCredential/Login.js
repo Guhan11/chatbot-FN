@@ -3,19 +3,21 @@ import {
   Card,
   CardContent,
   FormControl,
+  IconButton,
   Input,
   InputLabel,
   Link,
   Typography,
 } from '@mui/material'
-import axios from 'axios'
-import CryptoJS from 'crypto-js'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { toast, ToastContainer } from 'react-toastify'
 import { encryptPassword } from '../Util/encryptPassword'
 import { useNavigate } from 'react-router-dom'
+import api from '../ApiStructure/api'
+import apiCalls from '../ApiStructure/ApiCall'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const Login = () => {
   const [errors, setErrors] = useState({})
@@ -23,7 +25,16 @@ const Login = () => {
     email: '',
     password: '',
   })
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    //To show the message after login
+    if (localStorage.getItem('signupSuccess') === 'true') {
+      toast.success('Signed Up! Login Your Account!')
+      localStorage.removeItem('signupSuccess')
+    }
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -41,12 +52,15 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post(
-        'http://localhost:9000/api/auth/login',
-        dataToSend
-      )
+      const response = await apiCalls('post', `/auth/login`, dataToSend)
+      console.log('Backend response:', response)
 
-      if (response.data === true) {
+      if (response.token) {
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('name', response.name)
+        localStorage.setItem('email', response.email)
+        localStorage.setItem('editId', response.id)
+
         // Redirect to chatbot page
         navigate('/chatApp')
         toast.success('Login successful!')
@@ -61,10 +75,7 @@ const Login = () => {
   const handleGoogleSuccess = async (res) => {
     const token = res.credential
     try {
-      const response = await axios.post(
-        'http://localhost:9000/api/auth/googlelogin',
-        { token }
-      )
+      const response = await apiCalls('post', `/auth/googlelogin`, { token })
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
       localStorage.setItem('Token: ', token)
@@ -110,10 +121,25 @@ const Login = () => {
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
+                error={!!errors.password}
+                endAdornment={
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    aria-label="toggle password visibility"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                }
               />
+              {errors.password && (
+                <Typography color="error" variant="caption">
+                  {errors.password}
+                </Typography>
+              )}
             </FormControl>
             <Button
               variant="contained"

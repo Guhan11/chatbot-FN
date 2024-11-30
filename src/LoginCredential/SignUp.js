@@ -10,12 +10,16 @@ import {
   Button,
   Typography,
   Link,
+  IconButton,
 } from '@mui/material'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import axios from 'axios'
 import { encryptPassword } from '../Util/encryptPassword'
+import api from '../ApiStructure/api'
+import apiCalls from '../ApiStructure/ApiCall'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 export const SignUp = () => {
   const allowedChars = /^[a-zA-Z0-9 ]*$/
@@ -33,6 +37,9 @@ export const SignUp = () => {
     password: '',
     confirmPassword: '',
   })
+
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleUserNameChange = (e) => {
     const { name, value } = e.target
@@ -81,7 +88,7 @@ export const SignUp = () => {
       const dataToSend = {
         userName: formData.userName.toUpperCase(),
         email: formData.email,
-        password:encryptPassword(formData.password)
+        password: encryptPassword(formData.password),
       }
 
       console.log('Encrypted Password:', dataToSend.password)
@@ -89,22 +96,33 @@ export const SignUp = () => {
       try {
         // Make the API call to signup
         const response = await axios.post(
-          'http://localhost:9000/api/auth/signup',
+          `http://localhost:9000/api/auth/signup`,
           dataToSend
         )
+        console.log('Response:', response)
 
-        // Notify the user of a successful signup
-        toast.success('Signed up successfully!')
-        console.log('Signup response data:', response.data)
-        setFormData({
-          userName: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-        })
+        const { status, token, message, email, name, id } = response.data
+        console.log('Token:', token)
+
+        if (status === 'Success' && token) {
+          localStorage.setItem('token', token)
+          localStorage.setItem('email', email)
+          localStorage.setItem('name', name)
+          localStorage.setItem('editId', id)
+          window.location.href = '/chatApp'
+          // localStorage.setItem('signupSuccess', 'true'); to show message after redirect to login
+
+          setFormData({
+            userName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+          })
+        } else {
+          toast.error('Token not setted! Contact the developer.')
+        }
       } catch (error) {
-        console.error('Signup failed', error)
-        toast.error('Signup failed! Please try again.') // Improved error message
+        toast.error('Signup failed! Please try again.')
       }
     }
   }
@@ -113,10 +131,7 @@ export const SignUp = () => {
   const handleGoogleSuccess = async (res) => {
     const token = res.credential
     try {
-      const response = await axios.post(
-        'http://localhost:9000/api/auth/googlelogin',
-        { token }
-      )
+      const response = await apiCalls('post', `/auth/googlelogin`, { token })
       toast.success('Google Login Success!')
       console.log('Google Login Success:', response.data)
       localStorage.setItem('Token: ', token)
@@ -127,9 +142,9 @@ export const SignUp = () => {
   }
 
   // Google Sign-In Error Handler
-//   const handleGoogleError = () => {
-//     toast.error('Google Login Failed')
-//   }
+  //   const handleGoogleError = () => {
+  //     toast.error('Google Login Failed')
+  //   }
 
   return (
     <div
@@ -193,10 +208,19 @@ export const SignUp = () => {
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
                 error={!!errors.password}
+                endAdornment={
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                    aria-label="toggle password visibility"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                }
               />
               {errors.password && (
                 <Typography color="error" variant="caption">
@@ -212,10 +236,19 @@ export const SignUp = () => {
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={!!errors.confirmPassword}
+                endAdornment={
+                  <IconButton
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    edge="end"
+                    aria-label="toggle password visibility"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                }
               />
               {errors.confirmPassword && (
                 <Typography color="error" variant="caption">
