@@ -25,17 +25,25 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import apiCalls from '../ApiStructure/ApiCall' // Ensure this is correctly defined and imported
 import { toast, ToastContainer } from 'react-toastify' // Import toast for success/error notifications
 import axios from 'axios'
+import LockResetIcon from '@mui/icons-material/LockReset'
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle'
+import { encryptPassword } from '../Util/encryptPassword'
 
 const ProfileMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
+  const [changePassDialogOpen, setChangePassDialogOpen] = useState(false)
   const [loginEmail, setloginEmail] = useState(localStorage.getItem('email'))
   const [loginName, setloginName] = useState(localStorage.getItem('name'))
   const [editId, setEditId] = useState(localStorage.getItem('editId'))
   const [profileImage, setProfileImage] = useState(null)
   const [isHovered, setIsHovered] = useState(false)
   const [imageStatus, setImageStatus] = useState(null)
+  const [oldPass, setOldPass] = useState('')
+  const [newPass, setNewPass] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const [profileData, setProfileData] = useState({
     userName: loginName,
@@ -73,11 +81,23 @@ const ProfileMenu = () => {
     setConfirmDialogOpen(true)
   }
 
+  const handleOpenChangePassDialog = () => {
+    setAnchorEl(null)
+    setChangePassDialogOpen(true)
+  }
+
   const handleCloseConfirmDialog = () => setConfirmDialogOpen(false)
+  const handleCloseChangePassDialog = () => setChangePassDialogOpen(false)
 
   const handleLogout = () => {
     console.log('User logged out')
     setAnchorEl(null)
+    localStorage.removeItem('email')
+    localStorage.removeItem('name')
+    localStorage.removeItem('token')
+    localStorage.removeItem('editId')
+    navigate('/')
+    toast.success('Logged Out Successfully!')
   }
 
   // Update input fields in the Edit Profile dialog
@@ -88,11 +108,30 @@ const ProfileMenu = () => {
       [name]: value,
     }))
   }
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target
+    if (name === 'oldPass') setOldPass(value)
+    else if (name === 'newPass') setNewPass(value)
+    else if (name === 'confirmPassword') setConfirmPassword(value)
+  }
+
+  const validatePasswords = () => {
+    if (!oldPass || !newPass || !confirmPassword) {
+      setErrorMessage('Please fill in all fields.')
+      return false
+    }
+
+    if (newPass !== confirmPassword) {
+      setErrorMessage('New password and confirm password do not match.')
+      return false
+    }
+
+    setErrorMessage('') // Reset error message if validation passes
+    return true
+  }
 
   useEffect(() => {
-    if (editId) {
-      getUserDetails(editId)
-    }
+    getUserDetails(editId)
   }, [])
 
   const getUserDetails = async () => {
@@ -183,6 +222,33 @@ const ProfileMenu = () => {
       setImageStatus(204)
     }
   }
+
+  const handleSavePassword = async () => {
+    if (!validatePasswords()) return // Ensure passwords are valid before proceeding
+    const dataToSend = {
+      id: editId,
+      newPassword: encryptPassword(newPass),
+      oldPassword: encryptPassword(oldPass),
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:9000/api/auth/changePassword`,
+        dataToSend,
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+
+      toast.success('Password changed successfully!')
+      setOldPass('')
+      setNewPass('')
+      setConfirmPassword('')
+      handleCloseChangePassDialog() // Close dialog on success
+    } catch (error) {
+      toast.error('Failed to change password')
+      console.error('Error changing password:', error)
+    }
+  }
+
   // const toastContainerRef = useRef()
   // useEffect(() => {
   //   // Incorrectly trying to access internal methods or state
@@ -206,7 +272,7 @@ const ProfileMenu = () => {
               borderRadius: '50%', // Circular shape
               overflow: 'hidden', // Make sure the image covers the space
               transition: 'all 0.3s ease', // Smooth transition for hover effect
-              border: '4px solid #9e9e9e ', 
+              border: '4px solid #9e9e9e ',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Subtle shadow for depth
               '&:hover': {
                 border: '2px solid #1976d2', // Add blue border on hover
@@ -214,14 +280,14 @@ const ProfileMenu = () => {
               },
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.border = '4px solid #1976d2'; // Blue border on hover
-              e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)';
+              e.currentTarget.style.transform = 'scale(1.1)'
+              e.currentTarget.style.border = '4px solid #1976d2' // Blue border on hover
+              e.currentTarget.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.2)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)'; // Reset zoom
-              e.currentTarget.style.border = '4px solid #9e9e9e'; // Reset border
-              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'; // Reset shadow
+              e.currentTarget.style.transform = 'scale(1)' // Reset zoom
+              e.currentTarget.style.border = '4px solid #9e9e9e' // Reset border
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)' // Reset shadow
             }}
           />
         ) : (
@@ -326,17 +392,26 @@ const ProfileMenu = () => {
         <Divider />
 
         <MenuItem
-          style={{ padding: '10px 20px' }}
+          style={{ fontWeight: '500' }}
           onClick={handleOpenConfirmDialog}
         >
-          <SwapHorizIcon style={{ marginRight: '10px' }} />
+          <IconButton color="black">
+            <ChangeCircleIcon />
+          </IconButton>
           <Typography variant="body2">Change Account</Typography>
         </MenuItem>
 
         <MenuItem
-          style={{ padding: '10px 20px', fontWeight: '500' }}
-          onClick={handleLogout}
+          style={{ fontWeight: '500' }}
+          onClick={handleOpenChangePassDialog}
         >
+          <IconButton color="black">
+            <LockResetIcon />
+          </IconButton>
+          <Typography variant="body2">Change Password</Typography>
+        </MenuItem>
+
+        <MenuItem style={{ fontWeight: '500' }} onClick={handleLogout}>
           <IconButton color="black">
             <LogoutIcon />
           </IconButton>
@@ -420,7 +495,63 @@ const ProfileMenu = () => {
             Cancel
           </Button>
           <Button onClick={handleChangeAccount} color="primary">
-            Confirm
+            Yes, Change Account
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={changePassDialogOpen} onClose={handleCloseChangePassDialog}>
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+        <TextField
+            margin="dense"
+            label="Email"
+            name="email"
+            type="email"
+            value={loginEmail}
+            fullWidth
+            disabled
+          />
+          <TextField
+            margin="dense"
+            label="Old Password"
+            name="oldPass"
+            type="password"
+            value={oldPass}
+            onChange={handlePasswordChange}
+            fullWidth
+            required
+          />
+          <TextField
+            margin="dense"
+            label="New Password"
+            name="newPass"
+            type="password"
+            value={newPass}
+            onChange={handlePasswordChange}
+            fullWidth
+            required
+          />
+          <TextField
+            margin="dense"
+            label="Confirm New Password"
+            name="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={handlePasswordChange}
+            fullWidth
+            required
+          />
+          {errorMessage && (
+            <Typography color="error">{errorMessage}</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseChangePassDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSavePassword} color="primary">
+            Save
           </Button>
         </DialogActions>
       </Dialog>

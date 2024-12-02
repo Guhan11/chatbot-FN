@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import nilaLogo from '../Images/NILA.png';
+
 
 const ChatSideBar = () => {
   const [chatHistory, setChatHistory] = useState([
-    'Chat 1', 'Chat 2', 'Chat 3', 'Chat 4', 'Chat 5',
-  ]); // Example initial chats
+    'Chat 1',
+    'Chat 2',
+    'Chat 3',
+    'Chat 4',
+    'Chat 5',
+  ]) // Example initial chats
 
   return (
     <div className="flex flex-col w-full h-full bg-gray-50 text-gray-700">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 p-5">
-        <h2 className="text-lg font-medium text-gray-900">Chat Bot</h2>
+        <div className="flex items-center">
+          {/* Logo */}
+          <img
+            src={nilaLogo}
+            alt="NILA Logo"
+            className="w-8 h-8 rounded-full mr-2"
+          />
+          {/* Title */}
+          <h2 className="text-lg font-medium text-gray-900">NILA</h2>
+        </div>
       </div>
 
       {/* Chat History */}
@@ -28,7 +43,7 @@ const ChatSideBar = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatSideBar;
+export default ChatSideBar
